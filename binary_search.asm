@@ -7,7 +7,7 @@
 .data
 array:         .space  200    # 50 integers max
 intprompt:     .asciiz "How many integers?  "
-intsearch:     .asciiz "Search for which integer?  "
+intsearch:     .asciiz "\nSearch for which integer?  "
 blank:         .asciiz " "
 terpri:        .asciiz "\n"
 
@@ -77,6 +77,7 @@ arrayload:
      bne $t1, $s0, getinputs
 
 readyarray:
+     addi $t2, $s2, -4
      li $t5, 0
      la $a0, terpri
      li $v0, 4
@@ -94,6 +95,66 @@ printarray:
      addi $t5, $t5, 1
      bne $t5, $s0, printarray
 
+finditem:
+     la $a0, intsearch
+     li $v0, 4
+     syscall
+
+     li $v0, 5
+     syscall
+     move $s3, $v0
+
+     li $t0, 0
+     la $t1, array   # t1 = base address, $t2 already set to last item address
+     li $t5, 1       # Defaults to 1, which means value found, 0 not found
+
+     jal bsearch
+
+     move $a0, $t5
+     li $v0, 1
+     syscall
+
+     j finditem
+
+binarysearch:
+     li $t7, 4
+     subu $sp, $sp, $t7
+     sw $ra, 4($sp)
+
+     subu $t0, $t2, $t1
+     bne $t0, 0, search
+
+     move $t4, $t1
+     lw $t0, 0($t4)           # Load the item
+     beq $s3, $t0, return     # Found
+     li $t5, 0                # Set t5 to 0 if item is not found
+     j return
+
+search:
+     sra $t0, $t0, 3
+     sll $t0, $t0, 2
+     addu $t4, $t1, $t0
+     lw $t0, 0($t4)
+     beq $s3, $t0, return
+     slt $t6, $s3, $t0
+     li $t7, 1
+     beq $t6, $t7, look_left    # Keep searching to the left
+
+look_right:
+     addiu $t1, $t4, 4
+     jal binarysearch     # Recursive call to binary search
+     j return             # Finished, return back to caller
+
+look_left:
+     move $t2, $t4        # Keep searching to the left
+     jal binarysearch     # Recursive call to binary search
+
+return:
+     lw $ra, 4($sp)       # Obtain back return address from stack pointer
+     addiu $sp, $sp, 4    # Release 4 bytes on stack
+
+     j $ra                # Return to caller
+
 exit:
-     li $v0, 10          # terminate the program
+     li $v0, 10
      syscall
