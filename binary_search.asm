@@ -108,7 +108,7 @@ finditem:
      la $t1, array   # t1 = base address, $t2 already set to last item address
      li $t5, 1       # Defaults to 1, which means value found, 0 not found
 
-     jal bsearch
+     jal binarysearch
 
      move $a0, $t5
      li $v0, 1
