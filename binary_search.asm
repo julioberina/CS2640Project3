@@ -77,7 +77,7 @@ arrayload:
      bne $t1, $s0, getinputs
 
 readyarray:
-     addi $t2, $s2, -4
+     addi $s4, $s2, -4
      li $t5, 0
      la $a0, terpri
      li $v0, 4
@@ -105,8 +105,9 @@ finditem:
      move $s3, $v0
 
      li $t0, 0
-     la $t1, array   # t1 = base address, $t2 already set to last item address
-     li $t5, 1       # Defaults to 1, which means value found, 0 not found
+     la $t1, array        # t1 = base address
+     addiu $t2, $s4, 0    # t2 set to last - 1
+     li $t5, 1            # Defaults to 1, which means value found, 0 not found
 
      jal binarysearch
 
